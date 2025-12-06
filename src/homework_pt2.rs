@@ -54,8 +54,6 @@ impl<'a> HomeworkPt2<'a> {
             for row in 0..self.operands_height {
                 number.push(self.homework_sheet[row][col + this_problem.start]);
             }
-            // dbg!(&operands);
-            // dbg!(&number);
             operands.push(number.trim_ascii().parse::<u64>().unwrap());
         }
 
