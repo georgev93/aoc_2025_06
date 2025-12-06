@@ -5,32 +5,41 @@ struct ProblemCoords {
     operation: char,
 }
 
-pub struct Homework<'a> {
-    homework_sheet: &'a Vec<Vec<char>>,
+pub struct Homework {
+    homework_sheet: Vec<Vec<char>>,
     pub num_of_problems: usize,
     problems: Vec<ProblemCoords>,
     operands_height: usize,
 }
 
-impl<'a> Homework<'a> {
-    pub fn new(homework_input: &'a Vec<Vec<char>>) -> Self {
-        let rows = homework_input.len();
-        let cols = homework_input[0].len();
+impl Homework {
+    pub fn new(homework_input: &str) -> Self {
+        let mut homework_vec: Vec<Vec<char>> = Vec::new();
+        for line in homework_input.lines() {
+            let line_of_chars = line
+                .as_bytes()
+                .iter()
+                .map(|b| *b as char)
+                .collect::<Vec<char>>();
+            homework_vec.push(line_of_chars);
+        }
+        let rows = homework_vec.len();
+        let cols = homework_vec[0].len();
         let mut last_problem_coords = ProblemCoords {
             start: 0,
             width: 0,
-            operation: homework_input[rows - 1][0],
+            operation: homework_vec[rows - 1][0],
         };
-        let mut vec_of_problem_coords = Vec::<ProblemCoords>::new();
+        let mut vec_of_problem_coords = Vec::<ProblemCoords>::with_capacity(1500);
 
         for i in 1..cols {
-            if homework_input[rows - 1][i] != ' ' {
+            if homework_vec[rows - 1][i] != ' ' {
                 last_problem_coords.width = i - 1 - last_problem_coords.start;
                 vec_of_problem_coords.push(last_problem_coords);
                 last_problem_coords = ProblemCoords {
                     start: i,
                     width: 0,
-                    operation: homework_input[rows - 1][i],
+                    operation: homework_vec[rows - 1][i],
                 }
             }
         }
@@ -38,10 +47,10 @@ impl<'a> Homework<'a> {
         vec_of_problem_coords.push(last_problem_coords);
 
         Self {
-            homework_sheet: homework_input,
+            operands_height: &homework_vec.len() - 1,
+            homework_sheet: homework_vec,
             num_of_problems: vec_of_problem_coords.len(),
             problems: vec_of_problem_coords,
-            operands_height: homework_input.len() - 1,
         }
     }
 

@@ -5,75 +5,48 @@ use std::sync::{
 
 use std::thread;
 
-mod file_parser;
+pub mod file_parser;
 use crate::file_parser::{FileParser, FileParserTrait};
 
 mod homework;
 use crate::homework::Homework;
 
 pub fn solve_pt1(input_file: &str) -> u64 {
-    let input_grid = FileParser::new(input_file).parse_grid();
-    let my_homework = Arc::new(Homework::new(&input_grid));
+    let my_homework = Homework::new(input_file);
 
-    let total = Arc::new(AtomicU64::new(0));
+    let mut total = 0u64;
 
-    thread::scope(|s| {
-        for i in 0..my_homework.num_of_problems {
-            let total_clone = Arc::clone(&total);
-            let my_homework_clone = Arc::clone(&my_homework);
-            s.spawn(move || {
-                total_clone.fetch_add(my_homework_clone.solve_problem_human(i), Ordering::SeqCst);
-            });
-        }
-    });
+    for i in 0..my_homework.num_of_problems {
+        total += my_homework.solve_problem_human(i);
+    }
 
-    total.load(Ordering::Relaxed)
+    total
 }
 
 pub fn solve_pt2(input_file: &str) -> u64 {
-    let input_grid = FileParser::new(input_file).parse_grid();
-    let my_homework = Arc::new(Homework::new(&input_grid));
+    let my_homework = Homework::new(input_file);
 
-    let total = Arc::new(AtomicU64::new(0));
+    let mut total = 0u64;
 
-    thread::scope(|s| {
-        for i in 0..my_homework.num_of_problems {
-            let total_clone = Arc::clone(&total);
-            let my_homework_clone = Arc::clone(&my_homework);
-            s.spawn(move || {
-                total_clone.fetch_add(my_homework_clone.solve_problem_ceph(i), Ordering::SeqCst);
-            });
-        }
-    });
+    for i in 0..my_homework.num_of_problems {
+        total += my_homework.solve_problem_ceph(i);
+    }
 
-    total.load(Ordering::Relaxed)
+    total
 }
 
 pub fn solve(input_file: &str) -> (u64, u64) {
-    let input_grid = FileParser::new(input_file).parse_grid();
-    let my_homework = Arc::new(Homework::new(&input_grid));
+    let my_homework = Homework::new(input_file);
 
-    let total_pt1 = Arc::new(AtomicU64::new(0));
-    let total_pt2 = Arc::new(AtomicU64::new(0));
+    let mut total_pt1 = 0u64;
+    let mut total_pt2 = 0u64;
 
-    thread::scope(|s| {
-        for i in 0..my_homework.num_of_problems {
-            let total_pt1_clone = Arc::clone(&total_pt1);
-            let total_pt2_clone = Arc::clone(&total_pt2);
-            let my_homework_clone = Arc::clone(&my_homework);
-            s.spawn(move || {
-                total_pt1_clone
-                    .fetch_add(my_homework_clone.solve_problem_human(i), Ordering::SeqCst);
-                total_pt2_clone
-                    .fetch_add(my_homework_clone.solve_problem_ceph(i), Ordering::SeqCst);
-            });
-        }
-    });
+    for i in 0..my_homework.num_of_problems {
+        total_pt1 += my_homework.solve_problem_human(i);
+        total_pt2 += my_homework.solve_problem_ceph(i);
+    }
 
-    (
-        total_pt1.load(Ordering::Relaxed),
-        total_pt2.load(Ordering::Relaxed),
-    )
+    (total_pt1, total_pt2)
 }
 
 #[cfg(test)]
@@ -82,27 +55,31 @@ mod tests {
 
     #[test]
     fn example() {
-        let (part_1, part_2) = solve("data/example.txt");
+        let my_file = FileParser::new("data/example.txt");
+        let (part_1, part_2) = solve(my_file.get_str());
         assert_eq!(part_1, 4277556);
         assert_eq!(part_2, 3263827);
     }
 
     #[test]
     fn example_pts() {
-        assert_eq!(solve_pt1("data/example.txt"), 4277556);
-        assert_eq!(solve_pt2("data/example.txt"), 3263827);
+        let my_file = FileParser::new("data/example.txt");
+        assert_eq!(solve_pt1(my_file.get_str()), 4277556);
+        assert_eq!(solve_pt2(my_file.get_str()), 3263827);
     }
 
     #[test]
     fn actual() {
-        let (part_1, part_2) = solve("data/input.txt");
+        let my_file = FileParser::new("data/input.txt");
+        let (part_1, part_2) = solve(my_file.get_str());
         assert_eq!(part_1, 6757749566978);
         assert_eq!(part_2, 10603075273949);
     }
 
     #[test]
     fn actual_pts() {
-        assert_eq!(solve_pt1("data/input.txt"), 6757749566978);
-        assert_eq!(solve_pt2("data/input.txt"), 10603075273949);
+        let my_file = FileParser::new("data/input.txt");
+        assert_eq!(solve_pt1(my_file.get_str()), 6757749566978);
+        assert_eq!(solve_pt2(my_file.get_str()), 10603075273949);
     }
 }
