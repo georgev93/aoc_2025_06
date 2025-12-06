@@ -69,16 +69,16 @@ impl Homework {
         let mut answer = operands[0];
         match this_problem.operation {
             '*' => {
-                for i in 1..operands.len() {
-                    answer *= operands[i];
+                for operand in operands.iter().skip(1) {
+                    answer *= operand;
                 }
             }
             '+' => {
-                for i in 1..operands.len() {
-                    answer += operands[i];
+                for operand in operands.iter().skip(1) {
+                    answer += operand;
                 }
             }
-            _ => {}
+            _ => unreachable!(),
         }
         answer
     }
@@ -98,16 +98,16 @@ impl Homework {
         let mut answer = operands[0];
         match this_problem.operation {
             '*' => {
-                for i in 1..operands.len() {
-                    answer *= operands[i];
+                for operand in operands.iter().skip(1) {
+                    answer *= operand;
                 }
             }
             '+' => {
-                for i in 1..operands.len() {
-                    answer += operands[i];
+                for operand in operands.iter().skip(1) {
+                    answer += operand;
                 }
             }
-            _ => {}
+            _ => unreachable!(),
         }
         answer
     }
