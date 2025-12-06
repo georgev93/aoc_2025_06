@@ -6,7 +6,7 @@ use std::sync::{
 use std::thread;
 
 pub mod file_parser;
-use crate::file_parser::{FileParser, FileParserTrait};
+use crate::file_parser::FileParser;
 
 mod homework;
 use crate::homework::Homework;
