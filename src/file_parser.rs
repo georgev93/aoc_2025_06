@@ -8,6 +8,8 @@ use std::io::{BufRead, BufReader};
 pub trait FileParserTrait {
     fn parse_lines(&self) -> Vec<String>;
     fn parse_delimeted(&self) -> Vec<String>;
+    fn parse_grid(&self) -> Vec<Vec<char>>;
+    fn parse_grid_strings(&self) -> Vec<Vec<String>>;
 }
 
 pub struct FileParser {
@@ -40,42 +42,40 @@ impl FileParserTrait for FileParser {
         }
         items
     }
+
+    fn parse_grid(&self) -> Vec<Vec<char>> {
+        let mut ret_vec: Vec<Vec<char>> = Vec::new();
+        for line in BufReader::new(&self.file).lines() {
+            let unwrapped_line = line.unwrap();
+            let line_arr = unwrapped_line.trim_ascii().as_bytes();
+            let char_vec = line_arr.iter().map(|b| *b as char).collect::<Vec<char>>();
+
+            ret_vec.push(char_vec);
+        }
+        ret_vec
+    }
+
+    fn parse_grid_strings(&self) -> Vec<Vec<String>> {
+        let mut ret_vec: Vec<Vec<String>> = Vec::new();
+        for line in BufReader::new(&self.file).lines() {
+            let unwrapped_line = line.unwrap();
+
+            let line_arr = unwrapped_line
+                .trim_ascii()
+                .split_whitespace()
+                .map(|x| x.to_string())
+                .collect();
+
+            ret_vec.push(line_arr);
+        }
+        ret_vec
+    }
 }
 
 #[cfg(test)]
 pub mod tests {
 
     use super::*;
-
-    pub mod mocks {
-        use super::*;
-
-        pub struct MockFileParser {
-            pub mock_data: Vec<String>,
-        }
-
-        impl FileParserTrait for MockFileParser {
-            fn parse_lines(&self) -> Vec<String> {
-                self.mock_data.clone()
-            }
-
-            fn parse_delimeted(&self) -> Vec<String> {
-                self.mock_data.clone()
-            }
-        }
-    }
-
-    #[test]
-    fn mock_file_opener() {
-        let mock_parser = mocks::MockFileParser {
-            mock_data: vec!["one".to_string(), "two".to_string(), "three".to_string()],
-        };
-        let result_array = mock_parser.parse_lines();
-
-        assert_eq!(result_array[0], "one");
-        assert_eq!(result_array[1], "two");
-        assert_eq!(result_array[2], "three");
-    }
 
     #[test]
     #[should_panic(expected = "Could not find file \"not a path\"")]
@@ -113,5 +113,38 @@ pub mod tests {
         assert_eq!(result_vec[1], "two");
         assert_eq!(result_vec[2], "three");
         assert_eq!(result_vec[3], "four");
+    }
+
+    #[test]
+    fn grid() {
+        let result_vec = FileParser::new("tests/grid.txt").parse_grid();
+        assert_eq!(result_vec[0], vec!['1', '2', '3', '4', '5']);
+        assert_eq!(result_vec[1], vec!['a', 'b', 'c', 'd', 'e']);
+        assert_eq!(result_vec[2], vec!['6', '7', '8', '9', '0']);
+    }
+
+    #[test]
+    fn grid_strings() {
+        let result_vec = FileParser::new("tests/grid_spacing.txt").parse_grid_strings();
+        assert_eq!(
+            result_vec[0],
+            vec![
+                "1".to_string(),
+                "2".to_string(),
+                "3".to_string(),
+                "4".to_string(),
+                "5".to_string()
+            ]
+        );
+        assert_eq!(
+            result_vec[1],
+            vec![
+                "a".to_string(),
+                "b".to_string(),
+                "c".to_string(),
+                "d".to_string(),
+                "e".to_string()
+            ]
+        );
     }
 }
